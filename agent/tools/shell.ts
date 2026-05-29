@@ -1,5 +1,6 @@
 import { BaseTool, asNumber, asString, parseObjectInput } from "./common.ts";
 import type { ToolExecutionContext, ToolResult } from "../types/index.ts";
+import { PathGuard } from "./path_guard.ts";
 
 const DEFAULT_TIMEOUT_MS = 30_000;
 const MAX_TIMEOUT_MS = 120_000;
@@ -40,7 +41,17 @@ export class ShellTool extends BaseTool {
     const obj = parseObjectInput(input);
     const command = asString(obj.command, "command");
     const timeoutMs = Math.min(asNumber(obj.timeoutMs, DEFAULT_TIMEOUT_MS), MAX_TIMEOUT_MS);
-    const cwd = typeof obj.cwd === "string" && obj.cwd.trim().length > 0 ? obj.cwd : context.cwd;
+    const requestedCwd = typeof obj.cwd === "string" && obj.cwd.trim().length > 0
+      ? obj.cwd
+      : ".";
+
+    let cwd: string;
+    try {
+      const guard = new PathGuard(context.cwd, context.allowedPaths);
+      cwd = guard.resolveChecked(requestedCwd);
+    } catch (error) {
+      return this.fail(String(error));
+    }
 
     if (context.confirmDestructiveOps && isPotentiallyDestructive(` ${command} `)) {
       const approved = await context.confirm(
