@@ -1,0 +1,17 @@
+{
+  "tasks": {
+    "start": "deno run --allow-read --allow-write --allow-run --allow-env --allow-net main.ts",
+    "test": "deno test --allow-read --allow-write --allow-run --allow-env --allow-net"
+  },
+  "imports": {
+    "@std/assert": "jsr:@std/assert",
+    "@std/dotenv": "jsr:@std/dotenv",
+    "@std/flags": "jsr:@std/flags",
+    "@std/fs": "jsr:@std/fs",
+    "@std/path": "jsr:@std/path"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true
+  }
+}
